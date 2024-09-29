@@ -7,6 +7,7 @@ import 'package:zini_pay/pages/login_page/login_page.dart';
 Future<void> logout() async {
   final shouldLogout = await Get.dialog<bool>(
     AlertDialog(
+      backgroundColor: Colors.white,
       title: Text(
         'Confirm Logout',
         style: GoogleFonts.montserrat(),

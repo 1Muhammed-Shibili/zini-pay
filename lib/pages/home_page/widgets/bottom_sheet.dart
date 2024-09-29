@@ -10,9 +10,7 @@ class BottomSheetCustom extends StatelessWidget {
 
   BottomSheetCustom({super.key});
 
-  // Show messages bottom sheet
   void _showMessagesBottomSheet() {
-    // Show loading while fetching messages
     controller.fetchMessages().then((_) {
       Get.bottomSheet(
         Container(
@@ -61,7 +59,6 @@ class BottomSheetCustom extends StatelessWidget {
                   ],
                 ),
               ),
-              // Close button with opacity
               Positioned(
                 right: 0,
                 bottom: 10,
@@ -86,9 +83,7 @@ class BottomSheetCustom extends StatelessWidget {
     });
   }
 
-  // Show devices bottom sheet
   void _showDevicesBottomSheet() {
-    // Show loading while fetching devices
     controller.fetchDevices().then((_) {
       Get.bottomSheet(
         Container(

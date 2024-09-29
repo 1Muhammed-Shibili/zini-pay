@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:zini_pay/controllers/notification_controller.dart';
 
 class SmsSyncController extends GetxController {
   var isSyncing = false.obs;
@@ -23,44 +23,38 @@ class SmsSyncController extends GetxController {
 
   void _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings(
-            'app_icon'); // Ensure you have an icon named 'app_icon'
+        AndroidInitializationSettings('app_icon');
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  // Start syncing SMS messages
-  void startSyncing() {
+  void startSyncing() async {
     if (!isConnected.value) {
-      Get.snackbar('No Internet',
-          'Cannot start syncing without an internet connection.');
-      return; // Exit if not connected
+      NotificationService().showNotification(
+        title: 'Sync Error',
+        body: 'Cannot start syncing while offline.',
+      );
+      return;
     }
 
     isSyncing.value = true;
-    isSyncStarted.value = true; // Set to true when syncing starts
-    Get.snackbar('Syncing', 'Started syncing SMS messages in the background.');
-    _showNotification('SMS Sync', 'Syncing SMS messages in the background.');
 
-    // Schedule background sync using WorkManager
-    Workmanager().registerPeriodicTask(
-      'smsSyncTask', // Unique name for this task
-      'smsSyncTask', // Task name
-      frequency: const Duration(minutes: 15), // Sync every 15 minutes
+    NotificationService().showNotification(
+      title: 'Sync in Progress',
+      body: 'SMS syncing is ongoing.',
     );
   }
 
-  // Stop syncing SMS messages
   void stopSyncing() {
     isSyncing.value = false;
-    isSyncStarted.value = false;
-    Get.snackbar('Syncing', 'Stopped syncing SMS messages.');
 
-    // Cancel the persistent notification and background task
-    flutterLocalNotificationsPlugin.cancel(0);
-    Workmanager().cancelAll();
+    NotificationService().cancelNotification();
+    NotificationService().stopNotification(
+      title: 'Sync Stopped',
+      body: 'SMS syncing has been stopped.',
+    );
   }
 
   Future<void> syncSms(String message, String from, String timestamp) async {
@@ -100,7 +94,6 @@ class SmsSyncController extends GetxController {
     }
   }
 
-  // View all messages
   Future<void> fetchMessages() async {
     const url = 'https://demo.zinipay.com/sms';
 
@@ -123,7 +116,6 @@ class SmsSyncController extends GetxController {
     }
   }
 
-  // View all devices or login credentials
   Future<void> fetchDevices() async {
     const url = 'https://demo.zinipay.com/devices';
 
@@ -146,7 +138,6 @@ class SmsSyncController extends GetxController {
     }
   }
 
-  // Persistent notification
   Future<void> _showNotification(String title, String body) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails('your_channel_id', 'your_channel_name',

@@ -41,7 +41,6 @@ class HomePage extends StatelessWidget {
             HomePageWidgets.buildMessageAndDeviceButtons(
                 controller, bottomSheetCustom),
             const SizedBox(height: 10),
-            HomePageWidgets.buildSyncStoppedMessage(controller),
           ],
         ),
       ),

@@ -5,15 +5,29 @@ import 'package:zini_pay/controllers/notification_controller.dart';
 import 'package:zini_pay/pages/splashpage/splash_page.dart';
 
 void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
+  Workmanager().executeTask((task, inputData) async {
+    NotificationService().showNotification(
+      title: 'Background Syncing',
+      body: 'SMS syncing is running in the background.',
+    );
+
+    await Future.delayed(Duration(seconds: 10));
+
     return Future.value(true);
   });
 }
 
+Future<void> performSmsSync() async {
+  await Future.delayed(Duration(seconds: 10));
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  NotificationService notificationController = NotificationService();
+  await notificationController.initNotification();
+
   Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-  await NotificationService.initialize();
 
   runApp(const MyApp());
 }

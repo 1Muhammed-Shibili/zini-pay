@@ -1,47 +1,68 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin
-      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
 
-  // Initialize notifications
-  static Future<void> initialize() async {
+  Future<void> initNotification() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
 
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _notifications.initialize(initializationSettings);
+
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
   }
 
-  // Show persistent notification
-  static Future<void> showPersistentNotification() async {
+  Future<void> showNotification({
+    required String title,
+    required String body,
+  }) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'persistent_channel_id', // Channel ID
-      'Persistent Notifications', // Channel name
-      channelDescription: 'This channel is used for persistent notifications',
+      'sync_channel_id',
+      'Background Sync',
       importance: Importance.max,
       priority: Priority.high,
-      ongoing: true, // This makes the notification persistent
-      visibility: NotificationVisibility.public,
+      showWhen: true,
+      ongoing: true,
+      autoCancel: false,
     );
 
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await _flutterLocalNotificationsPlugin.show(
-      0, // Notification ID
-      'App Running', // Notification title
-      'Your app is running in the background', // Notification body
-      platformChannelSpecifics,
-    );
+    await _notifications.show(0, title, body, platformChannelSpecifics);
   }
 
-  // Remove persistent notification
-  static Future<void> removeNotification() async {
-    await _flutterLocalNotificationsPlugin
-        .cancel(0); // Cancel notification by ID
+  Future<void> stopNotification({
+    required String title,
+    required String body,
+  }) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'sync_channel_id',
+      'Background Sync',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+      autoCancel: false,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _notifications.show(0, title, body, platformChannelSpecifics);
+  }
+
+  Future<void> cancelNotification() async {
+    await _notifications.cancel(0);
   }
 }
